@@ -1,0 +1,15 @@
+micronaut:
+  application:
+    name: micronautDataIdExample
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/postgres
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: ''
+    dialect: POSTGRES
+flyway:
+  datasources:
+    default:
+      locations: classpath:databasemigrations
+      enabled: true
