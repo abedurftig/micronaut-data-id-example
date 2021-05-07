@@ -21,5 +21,13 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Build Cache
+        uses: actions/cache@v2.1.5
+        with:
+          path: |
+            ~/.gradle
+            ~/.m2/repository
+          key: build-cache
+
       - name: Build
         run: ./gradlew build
