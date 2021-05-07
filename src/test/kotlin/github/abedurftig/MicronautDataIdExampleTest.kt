@@ -25,23 +25,33 @@ class MicronautDataIdExampleTest : DatabaseTest() {
     private lateinit var exampleEntityRepository: ExampleEntityRepository
 
     @Test
-    fun `should persist entity`() {
+    fun `saved entity should have id from db sequence`() {
 
-        val exampleEntity = ExampleEntity(name = "Example entity")
+        Assertions.assertTrue(exampleEntityRepository.count() == 0L)
+
+        val exampleEntity = ExampleEntity(Long.MAX_VALUE, "Example entity")
         val persistedExampleEntity = exampleEntityRepository.save(exampleEntity)
-        val persistedAgainExampleEntity = exampleEntityRepository.save(exampleEntity)
 
+        Assertions.assertEquals(Long.MAX_VALUE, exampleEntity.id)
         Assertions.assertNotEquals(Long.MAX_VALUE, persistedExampleEntity.id)
 
-        println(exampleEntity)
-        println(persistedExampleEntity)
-        println(persistedAgainExampleEntity)
+        val persistedAgainExampleEntity = exampleEntityRepository.save(exampleEntity)
 
-        val toBeUpdated = ExampleEntity(2, "This is an updated name")
+        Assertions.assertNotEquals(persistedExampleEntity.id, persistedAgainExampleEntity.id)
+    }
+
+    @Test
+    fun `update entity by referencing DB id`() {
+
+        Assertions.assertTrue(exampleEntityRepository.count() == 0L)
+
+        val exampleEntity = ExampleEntity(Long.MAX_VALUE, "Example entity")
+        val persistedEntity = exampleEntityRepository.save(exampleEntity)
+
+        val toBeUpdated = ExampleEntity(persistedEntity.id, "This is an updated name")
         exampleEntityRepository.update(toBeUpdated)
-        val updatedOne = exampleEntityRepository.findById(2).get()
+        val updatedOne = exampleEntityRepository.findById(persistedEntity.id).get()
 
-        println(updatedOne)
         Assertions.assertEquals(toBeUpdated, updatedOne)
     }
 }
@@ -89,9 +99,9 @@ abstract class DatabaseTest : TestPropertyProvider {
         LOG.info("Running Postgres container at '$url'")
 
         return mutableMapOf(
-            "datasources.default.url" to "$url",
-            "datasources.default.username" to "$DB_USER",
-            "datasources.default.password" to "$DB_PASS",
+            "datasources.default.url" to url,
+            "datasources.default.username" to DB_USER,
+            "datasources.default.password" to DB_PASS,
             "datasources.default.driverClassName" to "org.postgresql.Driver",
         )
     }
